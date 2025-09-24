@@ -1,0 +1,13 @@
+br.com.gestao
+ ├── Main.java
+ ├── manager/
+ │     └── GestorSistema.java
+ ├── model/
+ │     ├── Usuario.java
+ │     ├── Projeto.java
+ │     ├── Equipe.java
+ │     ├── enums/
+ │     │     ├── PerfilUsuario.java
+ │     │     └── StatusProjeto.java
+ └── util/
+       └── InputUtils.java

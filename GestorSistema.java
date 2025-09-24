@@ -3,7 +3,9 @@ package br.com.gestao.manager;
 import br.com.gestao.model.*;
 import br.com.gestao.model.enums.PerfilUsuario;
 import br.com.gestao.model.enums.StatusProjeto;
+import br.com.gestao.model.enums.TipoPersistencia;
 import br.com.gestao.util.Persistencia;
+import br.com.gestao.util.PersistenciaCSV;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -16,6 +18,8 @@ public class GestorSistema {
     private List<Projeto> projetos = new ArrayList<>();
     private List<Equipe> equipes = new ArrayList<>();
 
+    private TipoPersistencia tipoPersistencia = TipoPersistencia.JSON; // padrão
+
     private static final String USUARIOS_ARQ = "usuarios.json";
     private static final String PROJETOS_ARQ = "projetos.json";
     private static final String EQUIPES_ARQ = "equipes.json";
@@ -24,8 +28,59 @@ public class GestorSistema {
     private static final String PROJETOS_CSV = "projetos.csv";
     private static final String EQUIPES_CSV = "equipes.csv";
 
-    // ==== PERSISTÊNCIA CSV ====
-    public void salvarCSV() {
+    // ==== Configuração de persistência ====
+    public void setTipoPersistencia(TipoPersistencia tipo) {
+        this.tipoPersistencia = tipo;
+    }
+
+    public TipoPersistencia getTipoPersistencia() {
+        return tipoPersistencia;
+    }
+
+    // ==== Salvar tudo ====
+    public void salvarTudo() {
+        if (tipoPersistencia == TipoPersistencia.JSON) {
+            salvarJSON();
+        } else {
+            salvarCSV();
+        }
+    }
+
+    // ==== Carregar tudo ====
+    public void carregarTudo() {
+        if (tipoPersistencia == TipoPersistencia.JSON) {
+            carregarJSON();
+        } else {
+            carregarCSV();
+        }
+    }
+
+    // ==== Persistência JSON ====
+    private void salvarJSON() {
+        Persistencia.salvar(USUARIOS_ARQ, usuarios);
+        Persistencia.salvar(PROJETOS_ARQ, projetos);
+        Persistencia.salvar(EQUIPES_ARQ, equipes);
+        System.out.println("Dados salvos em JSON!");
+    }
+
+    private void carregarJSON() {
+        Type usuariosType = new TypeToken<ArrayList<Usuario>>() {}.getType();
+        Type projetosType = new TypeToken<ArrayList<Projeto>>() {}.getType();
+        Type equipesType = new TypeToken<ArrayList<Equipe>>() {}.getType();
+
+        List<Usuario> u = Persistencia.carregar(USUARIOS_ARQ, usuariosType);
+        List<Projeto> p = Persistencia.carregar(PROJETOS_ARQ, projetosType);
+        List<Equipe> e = Persistencia.carregar(EQUIPES_ARQ, equipesType);
+
+        if (u != null) usuarios = u;
+        if (p != null) projetos = p;
+        if (e != null) equipes = e;
+
+        System.out.println("Dados carregados de JSON!");
+    }
+
+    // ==== Persistência CSV ====
+    private void salvarCSV() {
         // Usuários
         List<String[]> dadosUsuarios = new ArrayList<>();
         for (Usuario u : usuarios) {
@@ -61,7 +116,7 @@ public class GestorSistema {
         System.out.println("Dados salvos em CSV!");
     }
 
-    public void carregarCSV() {
+    private void carregarCSV() {
         // Usuários
         List<String[]> usuariosCSV = PersistenciaCSV.carregar(USUARIOS_CSV);
         for (String[] u : usuariosCSV) {
@@ -72,7 +127,6 @@ public class GestorSistema {
         List<String[]> equipesCSV = PersistenciaCSV.carregar(EQUIPES_CSV);
         for (String[] e : equipesCSV) {
             Equipe equipe = new Equipe(e[0], e[1]);
-            // Depois ligamos usuários pelo CPF
             if (e.length > 2 && !e[2].isEmpty()) {
                 String[] cpfs = e[2].split(",");
                 for (String cpf : cpfs) {
@@ -104,31 +158,7 @@ public class GestorSistema {
             projetos.add(projeto);
         }
 
-        System.out.println("Dados carregados do CSV!");
-    }
-
-    // ==== PERSISTÊNCIA ====
-    public void salvarTudo() {
-        Persistencia.salvar(USUARIOS_ARQ, usuarios);
-        Persistencia.salvar(PROJETOS_ARQ, projetos);
-        Persistencia.salvar(EQUIPES_ARQ, equipes);
-        System.out.println("Dados salvos com sucesso!");
-    }
-
-    public void carregarTudo() {
-        Type usuariosType = new TypeToken<ArrayList<Usuario>>() {}.getType();
-        Type projetosType = new TypeToken<ArrayList<Projeto>>() {}.getType();
-        Type equipesType = new TypeToken<ArrayList<Equipe>>() {}.getType();
-
-        List<Usuario> u = Persistencia.carregar(USUARIOS_ARQ, usuariosType);
-        List<Projeto> p = Persistencia.carregar(PROJETOS_ARQ, projetosType);
-        List<Equipe> e = Persistencia.carregar(EQUIPES_ARQ, equipesType);
-
-        if (u != null) usuarios = u;
-        if (p != null) projetos = p;
-        if (e != null) equipes = e;
-
-        System.out.println("Dados carregados!");
+        System.out.println("Dados carregados de CSV!");
     }
 
     // ==== USUÁRIOS ====

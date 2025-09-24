@@ -4,15 +4,34 @@ import br.com.gestao.manager.GestorSistema;
 import br.com.gestao.model.Usuario;
 import br.com.gestao.model.enums.PerfilUsuario;
 import br.com.gestao.model.enums.StatusProjeto;
+import br.com.gestao.model.enums.TipoPersistencia;
 
 import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        
+		Scanner scanner = new Scanner(System.in);
         GestorSistema gestor = new GestorSistema();
-		gestor.carregarTudo(); // <-- carregar dados ao iniciar
-        Scanner scanner = new Scanner(System.in);
+
+        // Perguntar persistência
+        System.out.println("Escolha o tipo de persistência:");
+        System.out.println("1 - JSON");
+        System.out.println("2 - CSV");
+        System.out.print("Opção: ");
+        int escolha = scanner.nextInt();
+        scanner.nextLine();
+
+        if (escolha == 2) {
+            gestor.setTipoPersistencia(TipoPersistencia.CSV);
+        } else {
+            gestor.setTipoPersistencia(TipoPersistencia.JSON);
+        }
+
+        gestor.carregarTudo(); // Carregar dados do formato escolhido
+
+		
         int opcao;
 
         do {
@@ -31,8 +50,6 @@ public class Main {
             System.out.println("12 - Listar equipes");
 			System.out.println("13 - Adicionar usuário em equipe");
 			System.out.println("14 - Associar equipe a projeto");
-			System.out.println("15 - Salvar em CSV");
-			System.out.println("16 - Carregar de CSV");
             System.out.println("0 - Sair");
             System.out.print("Escolha uma opção: ");
             opcao = scanner.nextInt();
@@ -162,10 +179,6 @@ public class Main {
 					String nomeProjeto = scanner.nextLine();
 					gestor.associarEquipeAProjeto(nomeEquipe, nomeProjeto);
 				}
-				
-				case 15 -> gestor.salvarCSV();
-				
-				case 16 -> gestor.carregarCSV();
 				
                 case 0 -> {
                     System.out.println("Encerrando sistema...");

@@ -41,8 +41,10 @@ public class GestorSistema {
     public void salvarTudo() {
         if (tipoPersistencia == TipoPersistencia.JSON) {
             salvarJSON();
+			salvarBackupJSON();
         } else {
             salvarCSV();
+			salvarBackupCSV();
         }
     }
 
@@ -54,6 +56,22 @@ public class GestorSistema {
             carregarCSV();
         }
     }
+
+	// ==== Backup JSON ====
+	private void salvarBackupJSON() {
+		Persistencia.salvar("backup_" + USUARIOS_ARQ, usuarios);
+		Persistencia.salvar("backup_" + PROJETOS_ARQ, projetos);
+		Persistencia.salvar("backup_" + EQUIPES_ARQ, equipes);
+		System.out.println("Backup JSON criado!");
+	}
+
+	// ==== Backup CSV ====
+	private void salvarBackupCSV() {
+		PersistenciaCSV.salvar("backup_" + USUARIOS_CSV, gerarDadosUsuariosCSV());
+		PersistenciaCSV.salvar("backup_" + PROJETOS_CSV, gerarDadosProjetosCSV());
+		PersistenciaCSV.salvar("backup_" + EQUIPES_CSV, gerarDadosEquipesCSV());
+		System.out.println("Backup CSV criado!");
+	}
 
     // ==== Persistência JSON ====
     private void salvarJSON() {
@@ -299,6 +317,35 @@ public class GestorSistema {
 		}
 	}
 
+	private List<String[]> gerarDadosUsuariosCSV() {
+		List<String[]> dados = new ArrayList<>();
+		for (Usuario u : usuarios) {
+			dados.add(new String[]{u.getNomeCompleto(), u.getCpf(), u.getEmail(), u.getPerfil().name()});
+		}
+		return dados;
+	}
+
+	private List<String[]> gerarDadosProjetosCSV() {
+		List<String[]> dados = new ArrayList<>();
+		for (Projeto p : projetos) {
+			dados.add(new String[]{
+					p.getNome(),
+					p.getStatus().name(),
+					p.getGerenteResponsavel() != null ? p.getGerenteResponsavel().getCpf() : "",
+					p.getEquipe() != null ? p.getEquipe().getNome() : ""
+			});
+		}
+		return dados;
+	}
+
+	private List<String[]> gerarDadosEquipesCSV() {
+		List<String[]> dados = new ArrayList<>();
+		for (Equipe e : equipes) {
+			String membros = String.join(",", e.getMembros().stream().map(Usuario::getCpf).toList());
+			dados.add(new String[]{e.getNome(), e.toString(), membros});
+		}
+		return dados;
+	}
 
 
     // ==== GETTERS ====

@@ -13,8 +13,17 @@ public class Equipe {
         this.descricao = descricao;
     }
 
+    // ==== GETTERS & SETTERS ====
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
+    public List<Usuario> getMembros() { return membros; }
+
+    // ==== REGRAS ====
     public void adicionarMembro(Usuario usuario) {
-        membros.add(usuario);
+        if (!membros.contains(usuario)) {
+            membros.add(usuario);
+        }
     }
 
     public void removerMembro(String cpf) {
@@ -28,8 +37,4 @@ public class Equipe {
                 ", membros=" + membros.size() +
                 '}';
     }
-	
-	public String getNome() { return nome; }
-	public void setNome(String nome) { this.nome = nome; }
-	public void setDescricao(String descricao) { this.descricao = descricao; }
 }

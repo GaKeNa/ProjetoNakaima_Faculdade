@@ -82,6 +82,45 @@ public class GestorSistema {
         boolean removido = equipes.removeIf(e -> e.getNome().equalsIgnoreCase(nome));
         System.out.println(removido ? "Equipe removida." : "Equipe não encontrada.");
     }
+	
+	// ==== ASSOCIAÇÕES ====
+
+	// Adicionar usuário em equipe
+	public void adicionarUsuarioEmEquipe(String cpf, String nomeEquipe) {
+		Usuario usuario = usuarios.stream()
+				.filter(u -> u.getCpf().equals(cpf))
+				.findFirst().orElse(null);
+
+		Equipe equipe = equipes.stream()
+				.filter(e -> e.getNome().equalsIgnoreCase(nomeEquipe))
+				.findFirst().orElse(null);
+
+		if (usuario != null && equipe != null) {
+			equipe.adicionarMembro(usuario);
+			System.out.println("Usuário " + usuario.getNomeCompleto() + " adicionado à equipe " + equipe.getNome());
+		} else {
+			System.out.println("Usuário ou equipe não encontrados.");
+		}
+	}
+
+	// Associar equipe a projeto
+	public void associarEquipeAProjeto(String nomeEquipe, String nomeProjeto) {
+		Equipe equipe = equipes.stream()
+				.filter(e -> e.getNome().equalsIgnoreCase(nomeEquipe))
+				.findFirst().orElse(null);
+
+		Projeto projeto = projetos.stream()
+				.filter(p -> p.getNome().equalsIgnoreCase(nomeProjeto))
+				.findFirst().orElse(null);
+
+		if (equipe != null && projeto != null) {
+			projeto.setEquipe(equipe);
+			System.out.println("Equipe " + equipe.getNome() + " atribuída ao projeto " + projeto.getNome());
+		} else {
+			System.out.println("Equipe ou projeto não encontrados.");
+		}
+	}
+
 
     // ==== GETTERS ====
     public List<Usuario> getUsuarios() { return usuarios; }

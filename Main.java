@@ -28,6 +28,8 @@ public class Main {
             System.out.println("10 - Atualizar equipe");
             System.out.println("11 - Remover equipe");
             System.out.println("12 - Listar equipes");
+			System.out.println("13 - Adicionar usuário em equipe");
+			System.out.println("14 - Associar equipe a projeto");
             System.out.println("0 - Sair");
             System.out.print("Escolha uma opção: ");
             opcao = scanner.nextInt();
@@ -141,6 +143,22 @@ public class Main {
                     gestor.removerEquipe(nomeEquipe);
                 }
                 case 12 -> gestor.getEquipes().forEach(System.out::println);
+				
+				case 13 -> {
+					System.out.print("CPF do usuário: ");
+					String cpfUsuario = scanner.nextLine();
+					System.out.print("Nome da equipe: ");
+					String nomeEquipe = scanner.nextLine();
+					gestor.adicionarUsuarioEmEquipe(cpfUsuario, nomeEquipe);
+				}
+
+				case 14 -> {
+					System.out.print("Nome da equipe: ");
+					String nomeEquipe = scanner.nextLine();
+					System.out.print("Nome do projeto: ");
+					String nomeProjeto = scanner.nextLine();
+					gestor.associarEquipeAProjeto(nomeEquipe, nomeProjeto);
+				}
 
                 case 0 -> System.out.println("Encerrando sistema...");
                 default -> System.out.println("Opção inválida!");

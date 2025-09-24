@@ -14,6 +14,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Arrays;
+import java.io.File;
 
 public class GestorSistema {
     private List<Usuario> usuarios = new ArrayList<>();
@@ -59,6 +61,16 @@ public class GestorSistema {
         }
     }
 
+	public List<String> listarBackups(String tipoArquivo) {
+		File pasta = new File("."); // pasta atual
+		String[] arquivos = pasta.list((dir, name) -> name.startsWith("backup_") && name.endsWith(tipoArquivo));
+		if (arquivos != null) {
+			Arrays.sort(arquivos); // opcional: ordenar por nome (timestamp)
+			return Arrays.asList(arquivos);
+		}
+		return new ArrayList<>();
+	}
+
 	// ==== Backup JSON ====
 	private void salvarBackupJSON() {
 		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
@@ -78,66 +90,37 @@ public class GestorSistema {
 	}
 
 	// ==== Restaurar BackUp ====
+	
+	public void restaurarBackupEscolhido() {
+		String extensao = tipoPersistencia == TipoPersistencia.JSON ? ".json" : ".csv";
 
-	public void restaurarBackup(String caminhoUsuarios, String caminhoProjetos, String caminhoEquipes) {
-		if (tipoPersistencia == TipoPersistencia.JSON) {
-			Type usuariosType = new TypeToken<ArrayList<Usuario>>() {}.getType();
-			Type projetosType = new TypeToken<ArrayList<Projeto>>() {}.getType();
-			Type equipesType = new TypeToken<ArrayList<Equipe>>() {}.getType();
+		List<String> backupsUsuarios = listarBackups("usuarios" + extensao);
+		List<String> backupsProjetos = listarBackups("projetos" + extensao);
+		List<String> backupsEquipes = listarBackups("equipes" + extensao);
 
-			List<Usuario> u = Persistencia.carregar(caminhoUsuarios, usuariosType);
-			List<Projeto> p = Persistencia.carregar(caminhoProjetos, projetosType);
-			List<Equipe> e = Persistencia.carregar(caminhoEquipes, equipesType);
-
-			if (u != null) usuarios = u;
-			if (p != null) projetos = p;
-			if (e != null) equipes = e;
-
-		} else {
-			List<String[]> usuariosCSV = PersistenciaCSV.carregar(caminhoUsuarios);
-			usuarios.clear();
-			for (String[] u : usuariosCSV) {
-				usuarios.add(new Usuario(u[0], u[1], u[2], PerfilUsuario.valueOf(u[3])));
-			}
-
-			List<String[]> equipesCSV = PersistenciaCSV.carregar(caminhoEquipes);
-			equipes.clear();
-			for (String[] e : equipesCSV) {
-				Equipe equipe = new Equipe(e[0], e[1]);
-				if (e.length > 2 && !e[2].isEmpty()) {
-					String[] cpfs = e[2].split(",");
-					for (String cpf : cpfs) {
-						usuarios.stream()
-								.filter(u -> u.getCpf().equals(cpf))
-								.findFirst()
-								.ifPresent(equipe::adicionarMembro);
-					}
-				}
-				equipes.add(equipe);
-			}
-
-			List<String[]> projetosCSV = PersistenciaCSV.carregar(caminhoProjetos);
-			projetos.clear();
-			for (String[] p : projetosCSV) {
-				Usuario gerente = usuarios.stream()
-						.filter(u -> u.getCpf().equals(p[2]))
-						.findFirst().orElse(null);
-				Equipe equipe = equipes.stream()
-						.filter(eq -> eq.getNome().equalsIgnoreCase(p[3]))
-						.findFirst().orElse(null);
-
-				Projeto projeto = new Projeto(
-						p[0], "Carregado do backup",
-						LocalDate.now(), LocalDate.now().plusDays(30),
-						StatusProjeto.valueOf(p[1]), gerente
-				);
-				projeto.setEquipe(equipe);
-				projetos.add(projeto);
-			}
+		if (backupsUsuarios.isEmpty() || backupsProjetos.isEmpty() || backupsEquipes.isEmpty()) {
+			System.out.println("Nenhum backup encontrado!");
+			return;
 		}
 
-		System.out.println("Backup restaurado com sucesso!");
+		System.out.println("\nBackups disponíveis de usuários:");
+		for (int i = 0; i < backupsUsuarios.size(); i++) {
+			System.out.println((i + 1) + " - " + backupsUsuarios.get(i));
+		}
+
+		Scanner sc = new Scanner(System.in);
+		System.out.print("Escolha o backup a restaurar (usuários/projetos/equipes com mesmo índice): ");
+		int escolha = sc.nextInt() - 1;
+
+		if (escolha >= 0 && escolha < backupsUsuarios.size()) {
+			restaurarBackup(backupsUsuarios.get(escolha),
+							backupsProjetos.get(escolha),
+							backupsEquipes.get(escolha));
+		} else {
+			System.out.println("Índice inválido!");
+		}
 	}
+
 
     // ==== Persistência JSON ====
     private void salvarJSON() {

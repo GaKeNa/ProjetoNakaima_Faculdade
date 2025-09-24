@@ -187,16 +187,7 @@ public class Main {
 				
                 case 16 -> gestor.carregarCSV();
 				
-				case 17 -> {
-					Scanner sc = new Scanner(System.in);
-					System.out.print("Digite o caminho do arquivo de usuários: ");
-					String u = sc.nextLine();
-					System.out.print("Digite o caminho do arquivo de projetos: ");
-					String p = sc.nextLine();
-					System.out.print("Digite o caminho do arquivo de equipes: ");
-					String e = sc.nextLine();
-					gestor.restaurarBackup(u, p, e);
-				}
+				case 17 -> gestor.restaurarBackupEscolhido();
 				
                 case 0 -> System.out.println("Encerrando sistema...");
 				

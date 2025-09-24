@@ -50,6 +50,9 @@ public class Main {
             System.out.println("12 - Listar equipes");
 			System.out.println("13 - Adicionar usuário em equipe");
 			System.out.println("14 - Associar equipe a projeto");
+			System.out.println("15 - Salvar em CSV");
+            System.out.println("16 - Carregar de CSV");
+			System.out.println("17 - Restaurar backup");
             System.out.println("0 - Sair");
             System.out.print("Escolha uma opção: ");
             opcao = scanner.nextInt();
@@ -178,6 +181,21 @@ public class Main {
 					System.out.print("Nome do projeto: ");
 					String nomeProjeto = scanner.nextLine();
 					gestor.associarEquipeAProjeto(nomeEquipe, nomeProjeto);
+				}				
+				                
+                case 15 -> gestor.salvarCSV();
+				
+                case 16 -> gestor.carregarCSV();
+				
+				case 17 -> {
+					Scanner sc = new Scanner(System.in);
+					System.out.print("Digite o caminho do arquivo de usuários: ");
+					String u = sc.nextLine();
+					System.out.print("Digite o caminho do arquivo de projetos: ");
+					String p = sc.nextLine();
+					System.out.print("Digite o caminho do arquivo de equipes: ");
+					String e = sc.nextLine();
+					gestor.restaurarBackup(u, p, e);
 				}
 				
                 case 0 -> System.out.println("Encerrando sistema...");

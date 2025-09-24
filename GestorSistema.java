@@ -9,9 +9,11 @@ import br.com.gestao.util.PersistenciaCSV;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class GestorSistema {
     private List<Usuario> usuarios = new ArrayList<>();
@@ -59,18 +61,82 @@ public class GestorSistema {
 
 	// ==== Backup JSON ====
 	private void salvarBackupJSON() {
-		Persistencia.salvar("backup_" + USUARIOS_ARQ, usuarios);
-		Persistencia.salvar("backup_" + PROJETOS_ARQ, projetos);
-		Persistencia.salvar("backup_" + EQUIPES_ARQ, equipes);
-		System.out.println("Backup JSON criado!");
+		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+		Persistencia.salvar("backup_usuarios_" + timestamp + ".json", usuarios);
+		Persistencia.salvar("backup_projetos_" + timestamp + ".json", projetos);
+		Persistencia.salvar("backup_equipes_" + timestamp + ".json", equipes);
+		System.out.println("Backup JSON criado: " + timestamp);
 	}
 
 	// ==== Backup CSV ====
 	private void salvarBackupCSV() {
-		PersistenciaCSV.salvar("backup_" + USUARIOS_CSV, gerarDadosUsuariosCSV());
-		PersistenciaCSV.salvar("backup_" + PROJETOS_CSV, gerarDadosProjetosCSV());
-		PersistenciaCSV.salvar("backup_" + EQUIPES_CSV, gerarDadosEquipesCSV());
-		System.out.println("Backup CSV criado!");
+		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+		PersistenciaCSV.salvar("backup_usuarios_" + timestamp + ".csv", gerarDadosUsuariosCSV());
+		PersistenciaCSV.salvar("backup_projetos_" + timestamp + ".csv", gerarDadosProjetosCSV());
+		PersistenciaCSV.salvar("backup_equipes_" + timestamp + ".csv", gerarDadosEquipesCSV());
+		System.out.println("Backup CSV criado: " + timestamp);
+	}
+
+	// ==== Restaurar BackUp ====
+
+	public void restaurarBackup(String caminhoUsuarios, String caminhoProjetos, String caminhoEquipes) {
+		if (tipoPersistencia == TipoPersistencia.JSON) {
+			Type usuariosType = new TypeToken<ArrayList<Usuario>>() {}.getType();
+			Type projetosType = new TypeToken<ArrayList<Projeto>>() {}.getType();
+			Type equipesType = new TypeToken<ArrayList<Equipe>>() {}.getType();
+
+			List<Usuario> u = Persistencia.carregar(caminhoUsuarios, usuariosType);
+			List<Projeto> p = Persistencia.carregar(caminhoProjetos, projetosType);
+			List<Equipe> e = Persistencia.carregar(caminhoEquipes, equipesType);
+
+			if (u != null) usuarios = u;
+			if (p != null) projetos = p;
+			if (e != null) equipes = e;
+
+		} else {
+			List<String[]> usuariosCSV = PersistenciaCSV.carregar(caminhoUsuarios);
+			usuarios.clear();
+			for (String[] u : usuariosCSV) {
+				usuarios.add(new Usuario(u[0], u[1], u[2], PerfilUsuario.valueOf(u[3])));
+			}
+
+			List<String[]> equipesCSV = PersistenciaCSV.carregar(caminhoEquipes);
+			equipes.clear();
+			for (String[] e : equipesCSV) {
+				Equipe equipe = new Equipe(e[0], e[1]);
+				if (e.length > 2 && !e[2].isEmpty()) {
+					String[] cpfs = e[2].split(",");
+					for (String cpf : cpfs) {
+						usuarios.stream()
+								.filter(u -> u.getCpf().equals(cpf))
+								.findFirst()
+								.ifPresent(equipe::adicionarMembro);
+					}
+				}
+				equipes.add(equipe);
+			}
+
+			List<String[]> projetosCSV = PersistenciaCSV.carregar(caminhoProjetos);
+			projetos.clear();
+			for (String[] p : projetosCSV) {
+				Usuario gerente = usuarios.stream()
+						.filter(u -> u.getCpf().equals(p[2]))
+						.findFirst().orElse(null);
+				Equipe equipe = equipes.stream()
+						.filter(eq -> eq.getNome().equalsIgnoreCase(p[3]))
+						.findFirst().orElse(null);
+
+				Projeto projeto = new Projeto(
+						p[0], "Carregado do backup",
+						LocalDate.now(), LocalDate.now().plusDays(30),
+						StatusProjeto.valueOf(p[1]), gerente
+				);
+				projeto.setEquipe(equipe);
+				projetos.add(projeto);
+			}
+		}
+
+		System.out.println("Backup restaurado com sucesso!");
 	}
 
     // ==== Persistência JSON ====

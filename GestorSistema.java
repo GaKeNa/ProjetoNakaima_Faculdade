@@ -161,75 +161,104 @@ public class GestorSistema {
         System.out.println("Dados carregados de CSV!");
     }
 
-    // ==== USUÁRIOS ====
-    public void cadastrarUsuario(String nome, String cpf, String email, String cargo,
-                                 String login, String senha, PerfilUsuario perfil) {
-        Usuario usuario = new Usuario(nome, cpf, email, cargo, login, senha, perfil);
-        usuarios.add(usuario);
-        System.out.println("Usuário cadastrado: " + usuario);
-    }
+	// ==== USUÁRIOS ====
+	public void cadastrarUsuario(Usuario usuario) {
+		usuarios.add(usuario);
+		salvarTudo(); // salva automático
+		System.out.println("Usuário cadastrado com sucesso!");
+	}
 
-    public void atualizarUsuario(String cpf, String novoEmail, String novoCargo) {
-        usuarios.stream()
-                .filter(u -> u.getCpf().equals(cpf))
-                .findFirst()
-                .ifPresentOrElse(u -> {
-                    if (novoEmail != null && !novoEmail.isBlank()) u.setEmail(novoEmail);
-                    if (novoCargo != null && !novoCargo.isBlank()) u.setCargo(novoCargo);
-                    System.out.println("Usuário atualizado: " + u);
-                }, () -> System.out.println("Usuário não encontrado."));
-    }
+	public void atualizarUsuario(String cpf, String novoNome, String novoEmail) {
+		for (Usuario u : usuarios) {
+			if (u.getCpf().equals(cpf)) {
+				u.setNomeCompleto(novoNome);
+				u.setEmail(novoEmail);
+				salvarTudo(); // salva automático
+				System.out.println("Usuário atualizado!");
+				return;
+			}
+		}
+		System.out.println("Usuário não encontrado!");
+	}
 
-    public void removerUsuario(String cpf) {
-        boolean removido = usuarios.removeIf(u -> u.getCpf().equals(cpf));
-        System.out.println(removido ? "Usuário removido." : "Usuário não encontrado.");
-    }
+	public void removerUsuario(String cpf) {
+		boolean removido = usuarios.removeIf(u -> u.getCpf().equals(cpf));
+		if (removido) {
+			salvarTudo(); // salva automático
+			System.out.println("Usuário removido!");
+		} else {
+			System.out.println("Usuário não encontrado!");
+		}
+	}
+
+	public void listarUsuarios() {
+		if (usuarios.isEmpty()) {
+			System.out.println("Nenhum usuário cadastrado.");
+		} else {
+			usuarios.forEach(System.out::println);
+		}
+	}
+
 
     // ==== PROJETOS ====
-    public void cadastrarProjeto(String nome, String descricao, LocalDate inicio,
-                                 LocalDate fim, StatusProjeto status, Usuario gerente) {
-        Projeto projeto = new Projeto(nome, descricao, inicio, fim, status, gerente);
-        projetos.add(projeto);
-        System.out.println("Projeto cadastrado: " + projeto);
-    }
+	public void cadastrarProjeto(Projeto projeto) {
+		projetos.add(projeto);
+		salvarTudo();
+		System.out.println("Projeto cadastrado!");
+	}
 
-    public void atualizarProjeto(String nome, StatusProjeto novoStatus) {
-        projetos.stream()
-                .filter(p -> p.getNome().equalsIgnoreCase(nome))
-                .findFirst()
-                .ifPresentOrElse(p -> {
-                    p.setStatus(novoStatus);
-                    System.out.println("Projeto atualizado: " + p);
-                }, () -> System.out.println("Projeto não encontrado."));
-    }
+	public void atualizarProjeto(String nomeProjeto, String novoNome) {
+		for (Projeto p : projetos) {
+			if (p.getNome().equalsIgnoreCase(nomeProjeto)) {
+				p.setNome(novoNome);
+				salvarTudo();
+				System.out.println("Projeto atualizado!");
+				return;
+			}
+		}
+		System.out.println("Projeto não encontrado!");
+	}
 
-    public void removerProjeto(String nome) {
-        boolean removido = projetos.removeIf(p -> p.getNome().equalsIgnoreCase(nome));
-        System.out.println(removido ? "Projeto removido." : "Projeto não encontrado.");
-    }
+	public void removerProjeto(String nomeProjeto) {
+		boolean removido = projetos.removeIf(p -> p.getNome().equalsIgnoreCase(nomeProjeto));
+		if (removido) {
+			salvarTudo();
+			System.out.println("Projeto removido!");
+		} else {
+			System.out.println("Projeto não encontrado!");
+		}
+	}
+
 
     // ==== EQUIPES ====
-    public void cadastrarEquipe(String nome, String descricao) {
-        Equipe equipe = new Equipe(nome, descricao);
-        equipes.add(equipe);
-        System.out.println("Equipe cadastrada: " + equipe);
-    }
+    public void cadastrarEquipe(Equipe equipe) {
+		equipes.add(equipe);
+		salvarTudo();
+		System.out.println("Equipe cadastrada!");
+	}
 
-    public void atualizarEquipe(String nome, String novoNome, String novaDesc) {
-        equipes.stream()
-                .filter(e -> e.getNome().equalsIgnoreCase(nome))
-                .findFirst()
-                .ifPresentOrElse(e -> {
-                    if (novoNome != null && !novoNome.isBlank()) e.setNome(novoNome);
-                    if (novaDesc != null && !novaDesc.isBlank()) e.setDescricao(novaDesc);
-                    System.out.println("Equipe atualizada: " + e);
-                }, () -> System.out.println("Equipe não encontrada."));
-    }
+	public void atualizarEquipe(String nomeEquipe, String novoNome) {
+		for (Equipe e : equipes) {
+			if (e.getNome().equalsIgnoreCase(nomeEquipe)) {
+				e.setNome(novoNome);
+				salvarTudo();
+				System.out.println("Equipe atualizada!");
+				return;
+			}
+		}
+		System.out.println("Equipe não encontrada!");
+	}
 
-    public void removerEquipe(String nome) {
-        boolean removido = equipes.removeIf(e -> e.getNome().equalsIgnoreCase(nome));
-        System.out.println(removido ? "Equipe removida." : "Equipe não encontrada.");
-    }
+	public void removerEquipe(String nomeEquipe) {
+		boolean removido = equipes.removeIf(e -> e.getNome().equalsIgnoreCase(nomeEquipe));
+		if (removido) {
+			salvarTudo();
+			System.out.println("Equipe removida!");
+		} else {
+			System.out.println("Equipe não encontrada!");
+		}
+	}
+
 	
 	// ==== ASSOCIAÇÕES ====
 
@@ -245,13 +274,13 @@ public class GestorSistema {
 
 		if (usuario != null && equipe != null) {
 			equipe.adicionarMembro(usuario);
-			System.out.println("Usuário " + usuario.getNomeCompleto() + " adicionado à equipe " + equipe.getNome());
+			salvarTudo(); // salva automático
+			System.out.println("Usuário adicionado à equipe!");
 		} else {
 			System.out.println("Usuário ou equipe não encontrados.");
 		}
 	}
 
-	// Associar equipe a projeto
 	public void associarEquipeAProjeto(String nomeEquipe, String nomeProjeto) {
 		Equipe equipe = equipes.stream()
 				.filter(e -> e.getNome().equalsIgnoreCase(nomeEquipe))
@@ -263,11 +292,13 @@ public class GestorSistema {
 
 		if (equipe != null && projeto != null) {
 			projeto.setEquipe(equipe);
-			System.out.println("Equipe " + equipe.getNome() + " atribuída ao projeto " + projeto.getNome());
+			salvarTudo(); // salva automático
+			System.out.println("Equipe atribuída ao projeto!");
 		} else {
 			System.out.println("Equipe ou projeto não encontrados.");
 		}
 	}
+
 
 
     // ==== GETTERS ====

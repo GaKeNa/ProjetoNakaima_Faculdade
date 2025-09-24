@@ -180,10 +180,8 @@ public class Main {
 					gestor.associarEquipeAProjeto(nomeEquipe, nomeProjeto);
 				}
 				
-                case 0 -> {
-                    System.out.println("Encerrando sistema...");
-                    gestor.salvarTudo(); // <-- salvar ao sair
-                }
+                case 0 -> System.out.println("Encerrando sistema...");
+				
                 default -> System.out.println("Opção inválida!");
             }
         } while (opcao != 0);

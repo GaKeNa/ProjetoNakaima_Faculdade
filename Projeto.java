@@ -34,4 +34,6 @@ public class Projeto {
                 ", gerente=" + (gerenteResponsavel != null ? gerenteResponsavel.getNomeCompleto() : "N/A") +
                 '}';
     }
+	
+	public void setStatus(StatusProjeto status) { this.status = status; }
 }

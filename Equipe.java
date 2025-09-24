@@ -28,4 +28,8 @@ public class Equipe {
                 ", membros=" + membros.size() +
                 '}';
     }
+	
+	public String getNome() { return nome; }
+	public void setNome(String nome) { this.nome = nome; }
+	public void setDescricao(String descricao) { this.descricao = descricao; }
 }

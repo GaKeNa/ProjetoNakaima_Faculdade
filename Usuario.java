@@ -10,6 +10,10 @@ public class Usuario {
     private String login;
     private String senha;
     private PerfilUsuario perfil;
+	
+	public void setEmail(String email) { this.email = email; }
+	public void setCargo(String cargo) { this.cargo = cargo; }
+
 
     public Usuario(String nomeCompleto, String cpf, String email, String cargo,
                    String login, String senha, PerfilUsuario perfil) {
@@ -40,4 +44,6 @@ public class Usuario {
                 ", perfil=" + perfil +
                 '}';
     }
+	
+	
 }

@@ -6,35 +6,136 @@ import br.com.gestao.model.enums.PerfilUsuario;
 import br.com.gestao.model.enums.StatusProjeto;
 
 import java.time.LocalDate;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         GestorSistema gestor = new GestorSistema();
+        Scanner scanner = new Scanner(System.in);
+        int opcao;
 
-        // Cadastrar usuários
-        gestor.cadastrarUsuario("Maria Silva", "12345678900", "maria@empresa.com",
-                "Analista", "maria", "1234", PerfilUsuario.GERENTE);
+        do {
+            System.out.println("\n==== MENU PRINCIPAL ====");
+            System.out.println("1 - Cadastrar usuário");
+            System.out.println("2 - Cadastrar projeto");
+            System.out.println("3 - Cadastrar equipe");
+            System.out.println("4 - Listar usuários");
+            System.out.println("5 - Listar projetos");
+            System.out.println("6 - Listar equipes");
+            System.out.println("0 - Sair");
+            System.out.print("Escolha uma opção: ");
+            opcao = scanner.nextInt();
+            scanner.nextLine(); // consumir quebra de linha
 
-        gestor.cadastrarUsuario("João Souza", "98765432100", "joao@empresa.com",
-                "Dev", "joao", "abcd", PerfilUsuario.COLABORADOR);
+            switch (opcao) {
+                case 1:
+                    System.out.print("Nome completo: ");
+                    String nome = scanner.nextLine();
 
-        // Pegar um gerente para projeto
-        Usuario gerente = gestor.getUsuarios().stream()
-                .filter(u -> u.getPerfil() == PerfilUsuario.GERENTE)
-                .findFirst()
-                .orElse(null);
+                    System.out.print("CPF: ");
+                    String cpf = scanner.nextLine();
 
-        // Cadastrar projeto
-        gestor.cadastrarProjeto("Sistema de Gestão", "Sistema para gerenciar projetos",
-                LocalDate.now(), LocalDate.now().plusMonths(6),
-                StatusProjeto.PLANEJADO, gerente);
+                    System.out.print("Email: ");
+                    String email = scanner.nextLine();
 
-        // Cadastrar equipe
-        gestor.cadastrarEquipe("Equipe Backend", "Equipe responsável pelo backend");
+                    System.out.print("Cargo: ");
+                    String cargo = scanner.nextLine();
 
-        // Mostrar listagens
-        System.out.println("\nUsuários cadastrados: " + gestor.getUsuarios());
-        System.out.println("Projetos cadastrados: " + gestor.getProjetos());
-        System.out.println("Equipes cadastradas: " + gestor.getEquipes());
+                    System.out.print("Login: ");
+                    String login = scanner.nextLine();
+
+                    System.out.print("Senha: ");
+                    String senha = scanner.nextLine();
+
+                    System.out.print("Perfil (1-ADMINISTRADOR, 2-GERENTE, 3-COLABORADOR): ");
+                    int perfilOpcao = scanner.nextInt();
+                    scanner.nextLine();
+
+                    PerfilUsuario perfil = switch (perfilOpcao) {
+                        case 1 -> PerfilUsuario.ADMINISTRADOR;
+                        case 2 -> PerfilUsuario.GERENTE;
+                        default -> PerfilUsuario.COLABORADOR;
+                    };
+
+                    gestor.cadastrarUsuario(nome, cpf, email, cargo, login, senha, perfil);
+                    break;
+
+                case 2:
+                    System.out.print("Nome do projeto: ");
+                    String nomeProjeto = scanner.nextLine();
+
+                    System.out.print("Descrição: ");
+                    String descricao = scanner.nextLine();
+
+                    System.out.print("Data de início (AAAA-MM-DD): ");
+                    LocalDate inicio = LocalDate.parse(scanner.nextLine());
+
+                    System.out.print("Data de fim prevista (AAAA-MM-DD): ");
+                    LocalDate fim = LocalDate.parse(scanner.nextLine());
+
+                    System.out.print("Status (1-PLANEJADO, 2-EM_ANDAMENTO, 3-CONCLUIDO, 4-CANCELADO): ");
+                    int statusOpcao = scanner.nextInt();
+                    scanner.nextLine();
+
+                    StatusProjeto status = switch (statusOpcao) {
+                        case 2 -> StatusProjeto.EM_ANDAMENTO;
+                        case 3 -> StatusProjeto.CONCLUIDO;
+                        case 4 -> StatusProjeto.CANCELADO;
+                        default -> StatusProjeto.PLANEJADO;
+                    };
+
+                    // Selecionar gerente responsável
+                    System.out.println("Escolha o CPF do gerente responsável:");
+                    gestor.getUsuarios().forEach(u -> {
+                        if (u.getPerfil() == PerfilUsuario.GERENTE) {
+                            System.out.println(" - " + u.getCpf() + " | " + u.getNomeCompleto());
+                        }
+                    });
+
+                    String cpfGerente = scanner.nextLine();
+                    Usuario gerente = gestor.getUsuarios().stream()
+                            .filter(u -> u.getCpf().equals(cpfGerente) && u.getPerfil() == PerfilUsuario.GERENTE)
+                            .findFirst()
+                            .orElse(null);
+
+                    gestor.cadastrarProjeto(nomeProjeto, descricao, inicio, fim, status, gerente);
+                    break;
+
+                case 3:
+                    System.out.print("Nome da equipe: ");
+                    String nomeEquipe = scanner.nextLine();
+
+                    System.out.print("Descrição: ");
+                    String descEquipe = scanner.nextLine();
+
+                    gestor.cadastrarEquipe(nomeEquipe, descEquipe);
+                    break;
+
+                case 4:
+                    System.out.println("=== Usuários ===");
+                    gestor.getUsuarios().forEach(System.out::println);
+                    break;
+
+                case 5:
+                    System.out.println("=== Projetos ===");
+                    gestor.getProjetos().forEach(System.out::println);
+                    break;
+
+                case 6:
+                    System.out.println("=== Equipes ===");
+                    gestor.getEquipes().forEach(System.out::println);
+                    break;
+
+                case 0:
+                    System.out.println("Encerrando sistema...");
+                    break;
+
+                default:
+                    System.out.println("Opção inválida!");
+            }
+
+        } while (opcao != 0);
+
+        scanner.close();
     }
 }

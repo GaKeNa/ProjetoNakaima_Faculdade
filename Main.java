@@ -11,6 +11,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         GestorSistema gestor = new GestorSistema();
+		gestor.carregarTudo(); // <-- carregar dados ao iniciar
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -160,7 +161,10 @@ public class Main {
 					gestor.associarEquipeAProjeto(nomeEquipe, nomeProjeto);
 				}
 
-                case 0 -> System.out.println("Encerrando sistema...");
+                case 0 -> {
+                    System.out.println("Encerrando sistema...");
+                    gestor.salvarTudo(); // <-- salvar ao sair
+                }
                 default -> System.out.println("Opção inválida!");
             }
         } while (opcao != 0);

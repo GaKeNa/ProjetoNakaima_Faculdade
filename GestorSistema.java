@@ -3,7 +3,10 @@ package br.com.gestao.manager;
 import br.com.gestao.model.*;
 import br.com.gestao.model.enums.PerfilUsuario;
 import br.com.gestao.model.enums.StatusProjeto;
+import br.com.gestao.util.Persistencia;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +15,34 @@ public class GestorSistema {
     private List<Usuario> usuarios = new ArrayList<>();
     private List<Projeto> projetos = new ArrayList<>();
     private List<Equipe> equipes = new ArrayList<>();
+
+    private static final String USUARIOS_ARQ = "usuarios.json";
+    private static final String PROJETOS_ARQ = "projetos.json";
+    private static final String EQUIPES_ARQ = "equipes.json";
+
+    // ==== PERSISTÊNCIA ====
+    public void salvarTudo() {
+        Persistencia.salvar(USUARIOS_ARQ, usuarios);
+        Persistencia.salvar(PROJETOS_ARQ, projetos);
+        Persistencia.salvar(EQUIPES_ARQ, equipes);
+        System.out.println("Dados salvos com sucesso!");
+    }
+
+    public void carregarTudo() {
+        Type usuariosType = new TypeToken<ArrayList<Usuario>>() {}.getType();
+        Type projetosType = new TypeToken<ArrayList<Projeto>>() {}.getType();
+        Type equipesType = new TypeToken<ArrayList<Equipe>>() {}.getType();
+
+        List<Usuario> u = Persistencia.carregar(USUARIOS_ARQ, usuariosType);
+        List<Projeto> p = Persistencia.carregar(PROJETOS_ARQ, projetosType);
+        List<Equipe> e = Persistencia.carregar(EQUIPES_ARQ, equipesType);
+
+        if (u != null) usuarios = u;
+        if (p != null) projetos = p;
+        if (e != null) equipes = e;
+
+        System.out.println("Dados carregados!");
+    }
 
     // ==== USUÁRIOS ====
     public void cadastrarUsuario(String nome, String cpf, String email, String cargo,

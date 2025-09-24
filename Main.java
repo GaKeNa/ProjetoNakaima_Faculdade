@@ -31,6 +31,8 @@ public class Main {
             System.out.println("12 - Listar equipes");
 			System.out.println("13 - Adicionar usuário em equipe");
 			System.out.println("14 - Associar equipe a projeto");
+			System.out.println("15 - Salvar em CSV");
+			System.out.println("16 - Carregar de CSV");
             System.out.println("0 - Sair");
             System.out.print("Escolha uma opção: ");
             opcao = scanner.nextInt();
@@ -160,7 +162,11 @@ public class Main {
 					String nomeProjeto = scanner.nextLine();
 					gestor.associarEquipeAProjeto(nomeEquipe, nomeProjeto);
 				}
-
+				
+				case 15 -> gestor.salvarCSV();
+				
+				case 16 -> gestor.carregarCSV();
+				
                 case 0 -> {
                     System.out.println("Encerrando sistema...");
                     gestor.salvarTudo(); // <-- salvar ao sair

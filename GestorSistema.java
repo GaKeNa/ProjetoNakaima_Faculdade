@@ -20,6 +20,93 @@ public class GestorSistema {
     private static final String PROJETOS_ARQ = "projetos.json";
     private static final String EQUIPES_ARQ = "equipes.json";
 
+	private static final String USUARIOS_CSV = "usuarios.csv";
+    private static final String PROJETOS_CSV = "projetos.csv";
+    private static final String EQUIPES_CSV = "equipes.csv";
+
+    // ==== PERSISTÊNCIA CSV ====
+    public void salvarCSV() {
+        // Usuários
+        List<String[]> dadosUsuarios = new ArrayList<>();
+        for (Usuario u : usuarios) {
+            dadosUsuarios.add(new String[]{
+                    u.getNomeCompleto(),
+                    u.getCpf(),
+                    u.getEmail(),
+                    u.getPerfil().name()
+            });
+        }
+        PersistenciaCSV.salvar(USUARIOS_CSV, dadosUsuarios);
+
+        // Projetos
+        List<String[]> dadosProjetos = new ArrayList<>();
+        for (Projeto p : projetos) {
+            dadosProjetos.add(new String[]{
+                    p.getNome(),
+                    p.getStatus().name(),
+                    p.getGerenteResponsavel() != null ? p.getGerenteResponsavel().getCpf() : "",
+                    p.getEquipe() != null ? p.getEquipe().getNome() : ""
+            });
+        }
+        PersistenciaCSV.salvar(PROJETOS_CSV, dadosProjetos);
+
+        // Equipes
+        List<String[]> dadosEquipes = new ArrayList<>();
+        for (Equipe e : equipes) {
+            String membros = String.join(",", e.getMembros().stream().map(Usuario::getCpf).toList());
+            dadosEquipes.add(new String[]{e.getNome(), e.toString(), membros});
+        }
+        PersistenciaCSV.salvar(EQUIPES_CSV, dadosEquipes);
+
+        System.out.println("Dados salvos em CSV!");
+    }
+
+    public void carregarCSV() {
+        // Usuários
+        List<String[]> usuariosCSV = PersistenciaCSV.carregar(USUARIOS_CSV);
+        for (String[] u : usuariosCSV) {
+            usuarios.add(new Usuario(u[0], u[1], u[2], PerfilUsuario.valueOf(u[3])));
+        }
+
+        // Equipes
+        List<String[]> equipesCSV = PersistenciaCSV.carregar(EQUIPES_CSV);
+        for (String[] e : equipesCSV) {
+            Equipe equipe = new Equipe(e[0], e[1]);
+            // Depois ligamos usuários pelo CPF
+            if (e.length > 2 && !e[2].isEmpty()) {
+                String[] cpfs = e[2].split(",");
+                for (String cpf : cpfs) {
+                    usuarios.stream()
+                            .filter(u -> u.getCpf().equals(cpf))
+                            .findFirst()
+                            .ifPresent(equipe::adicionarMembro);
+                }
+            }
+            equipes.add(equipe);
+        }
+
+        // Projetos
+        List<String[]> projetosCSV = PersistenciaCSV.carregar(PROJETOS_CSV);
+        for (String[] p : projetosCSV) {
+            Usuario gerente = usuarios.stream()
+                    .filter(u -> u.getCpf().equals(p[2]))
+                    .findFirst().orElse(null);
+            Equipe equipe = equipes.stream()
+                    .filter(eq -> eq.getNome().equalsIgnoreCase(p[3]))
+                    .findFirst().orElse(null);
+
+            Projeto projeto = new Projeto(
+                    p[0], "Carregado do CSV",
+                    LocalDate.now(), LocalDate.now().plusDays(30),
+                    StatusProjeto.valueOf(p[1]), gerente
+            );
+            projeto.setEquipe(equipe);
+            projetos.add(projeto);
+        }
+
+        System.out.println("Dados carregados do CSV!");
+    }
+
     // ==== PERSISTÊNCIA ====
     public void salvarTudo() {
         Persistencia.salvar(USUARIOS_ARQ, usuarios);

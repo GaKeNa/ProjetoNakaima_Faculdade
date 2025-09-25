@@ -11,190 +11,157 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        
-		Scanner scanner = new Scanner(System.in);
         GestorSistema gestor = new GestorSistema();
+        Scanner sc = new Scanner(System.in);
 
-        // Perguntar persistência
-        System.out.println("Escolha o tipo de persistência:");
-        System.out.println("1 - JSON");
-        System.out.println("2 - CSV");
-        System.out.print("Opção: ");
-        int escolha = scanner.nextInt();
-        scanner.nextLine();
+        // Definir tipo de persistência
+        System.out.println("Escolha o tipo de persistência: (1) JSON ou (2) CSV");
+        int tipo = sc.nextInt();
+        sc.nextLine();
 
-        if (escolha == 2) {
+        if (tipo == 2) {
             gestor.setTipoPersistencia(TipoPersistencia.CSV);
         } else {
             gestor.setTipoPersistencia(TipoPersistencia.JSON);
         }
 
-        gestor.carregarTudo(); // Carregar dados do formato escolhido
+        gestor.carregarTudo();
 
-		
         int opcao;
-
         do {
-            System.out.println("\n==== MENU PRINCIPAL ====");
-            System.out.println("1 - Cadastrar usuário");
-            System.out.println("2 - Atualizar usuário");
-            System.out.println("3 - Remover usuário");
-            System.out.println("4 - Listar usuários");
-            System.out.println("5 - Cadastrar projeto");
-            System.out.println("6 - Atualizar status do projeto");
-            System.out.println("7 - Remover projeto");
-            System.out.println("8 - Listar projetos");
-            System.out.println("9 - Cadastrar equipe");
-            System.out.println("10 - Atualizar equipe");
-            System.out.println("11 - Remover equipe");
-            System.out.println("12 - Listar equipes");
-			System.out.println("13 - Adicionar usuário em equipe");
-			System.out.println("14 - Associar equipe a projeto");
-			System.out.println("15 - Salvar em CSV");
-            System.out.println("16 - Carregar de CSV");
-			System.out.println("17 - Restaurar backup");
-            System.out.println("0 - Sair");
-            System.out.print("Escolha uma opção: ");
-            opcao = scanner.nextInt();
-            scanner.nextLine();
+            System.out.println("\n===== MENU =====");
+            System.out.println("1. Cadastrar Usuário");
+            System.out.println("2. Atualizar Usuário");
+            System.out.println("3. Remover Usuário");
+            System.out.println("4. Cadastrar Projeto");
+            System.out.println("5. Atualizar Projeto");
+            System.out.println("6. Remover Projeto");
+            System.out.println("7. Cadastrar Equipe");
+            System.out.println("8. Atualizar Equipe");
+            System.out.println("9. Remover Equipe");
+            System.out.println("10. Adicionar Usuário em Equipe");
+            System.out.println("11. Associar Equipe a Projeto");
+            System.out.println("12. Restaurar Backup");
+            System.out.println("0. Sair");
+            System.out.print("Opção: ");
+            opcao = sc.nextInt();
+            sc.nextLine();
 
             switch (opcao) {
-                // ==== USUÁRIO ====
                 case 1 -> {
-                    System.out.print("Nome completo: ");
-                    String nome = scanner.nextLine();
+                    System.out.print("Nome: ");
+                    String nome = sc.nextLine();
                     System.out.print("CPF: ");
-                    String cpf = scanner.nextLine();
+                    String cpf = sc.nextLine();
                     System.out.print("Email: ");
-                    String email = scanner.nextLine();
+                    String email = sc.nextLine();
                     System.out.print("Cargo: ");
-                    String cargo = scanner.nextLine();
+                    String cargo = sc.nextLine();
                     System.out.print("Login: ");
-                    String login = scanner.nextLine();
+                    String login = sc.nextLine();
                     System.out.print("Senha: ");
-                    String senha = scanner.nextLine();
-                    System.out.print("Perfil (1-ADMIN, 2-GERENTE, 3-COLABORADOR): ");
-                    int perfilOpcao = scanner.nextInt(); scanner.nextLine();
-                    PerfilUsuario perfil = switch (perfilOpcao) {
-                        case 1 -> PerfilUsuario.ADMINISTRADOR;
-                        case 2 -> PerfilUsuario.GERENTE;
-                        default -> PerfilUsuario.COLABORADOR;
-                    };
+                    String senha = sc.nextLine();
+                    System.out.print("Perfil (ADMIN, GERENTE, COLABORADOR): ");
+                    PerfilUsuario perfil = PerfilUsuario.valueOf(sc.nextLine().toUpperCase());
+
                     gestor.cadastrarUsuario(nome, cpf, email, cargo, login, senha, perfil);
                 }
                 case 2 -> {
-                    System.out.print("Digite o CPF do usuário: ");
-                    String cpf = scanner.nextLine();
+                    System.out.print("CPF do usuário a atualizar: ");
+                    String cpf = sc.nextLine();
                     System.out.print("Novo email: ");
-                    String novoEmail = scanner.nextLine();
+                    String novoEmail = sc.nextLine();
                     System.out.print("Novo cargo: ");
-                    String novoCargo = scanner.nextLine();
+                    String novoCargo = sc.nextLine();
                     gestor.atualizarUsuario(cpf, novoEmail, novoCargo);
                 }
                 case 3 -> {
-                    System.out.print("Digite o CPF do usuário: ");
-                    String cpf = scanner.nextLine();
+                    System.out.print("CPF do usuário a remover: ");
+                    String cpf = sc.nextLine();
                     gestor.removerUsuario(cpf);
                 }
-                case 4 -> gestor.getUsuarios().forEach(System.out::println);
-
-                // ==== PROJETO ====
-                case 5 -> {
+                case 4 -> {
                     System.out.print("Nome do projeto: ");
-                    String nomeProjeto = scanner.nextLine();
+                    String nome = sc.nextLine();
                     System.out.print("Descrição: ");
-                    String descricao = scanner.nextLine();
-                    System.out.print("Data início (AAAA-MM-DD): ");
-                    LocalDate inicio = LocalDate.parse(scanner.nextLine());
-                    System.out.print("Data fim (AAAA-MM-DD): ");
-                    LocalDate fim = LocalDate.parse(scanner.nextLine());
-                    System.out.print("Status (1-PLANEJADO, 2-EM_ANDAMENTO, 3-CONCLUIDO, 4-CANCELADO): ");
-                    int statusOpcao = scanner.nextInt(); scanner.nextLine();
-                    StatusProjeto status = switch (statusOpcao) {
-                        case 2 -> StatusProjeto.EM_ANDAMENTO;
-                        case 3 -> StatusProjeto.CONCLUIDO;
-                        case 4 -> StatusProjeto.CANCELADO;
-                        default -> StatusProjeto.PLANEJADO;
-                    };
+                    String desc = sc.nextLine();
+                    System.out.print("Data de início (yyyy-MM-dd): ");
+                    LocalDate inicio = LocalDate.parse(sc.nextLine());
+                    System.out.print("Data de fim (yyyy-MM-dd): ");
+                    LocalDate fim = LocalDate.parse(sc.nextLine());
+                    System.out.print("Status (PLANEJADO, EM_ANDAMENTO, CONCLUIDO, CANCELADO): ");
+                    StatusProjeto status = StatusProjeto.valueOf(sc.nextLine().toUpperCase());
                     System.out.print("CPF do gerente responsável: ");
-                    String cpfGerente = scanner.nextLine();
+                    String cpfGerente = sc.nextLine();
+
                     Usuario gerente = gestor.getUsuarios().stream()
-                            .filter(u -> u.getCpf().equals(cpfGerente) && u.getPerfil() == PerfilUsuario.GERENTE)
+                            .filter(u -> u.getCpf().equals(cpfGerente))
                             .findFirst().orElse(null);
-                    gestor.cadastrarProjeto(nomeProjeto, descricao, inicio, fim, status, gerente);
+
+                    gestor.cadastrarProjeto(nome, desc, inicio, fim, status, gerente);
                 }
-                case 6 -> {
-                    System.out.print("Nome do projeto: ");
-                    String nome = scanner.nextLine();
-                    System.out.print("Novo status (1-PLANEJADO, 2-EM_ANDAMENTO, 3-CONCLUIDO, 4-CANCELADO): ");
-                    int statusOpcao = scanner.nextInt(); scanner.nextLine();
-                    StatusProjeto novoStatus = switch (statusOpcao) {
-                        case 2 -> StatusProjeto.EM_ANDAMENTO;
-                        case 3 -> StatusProjeto.CONCLUIDO;
-                        case 4 -> StatusProjeto.CANCELADO;
-                        default -> StatusProjeto.PLANEJADO;
-                    };
+                case 5 -> {
+                    System.out.print("Nome do projeto a atualizar: ");
+                    String nome = sc.nextLine();
+                    System.out.print("Novo status (PLANEJADO, EM_ANDAMENTO, CONCLUIDO, CANCELADO): ");
+                    StatusProjeto novoStatus = StatusProjeto.valueOf(sc.nextLine().toUpperCase());
                     gestor.atualizarProjeto(nome, novoStatus);
                 }
-                case 7 -> {
-                    System.out.print("Nome do projeto: ");
-                    String nome = scanner.nextLine();
+                case 6 -> {
+                    System.out.print("Nome do projeto a remover: ");
+                    String nome = sc.nextLine();
                     gestor.removerProjeto(nome);
                 }
-                case 8 -> gestor.getProjetos().forEach(System.out::println);
-
-                // ==== EQUIPE ====
-                case 9 -> {
+                case 7 -> {
                     System.out.print("Nome da equipe: ");
-                    String nomeEquipe = scanner.nextLine();
+                    String nome = sc.nextLine();
                     System.out.print("Descrição: ");
-                    String descEquipe = scanner.nextLine();
-                    gestor.cadastrarEquipe(nomeEquipe, descEquipe);
+                    String desc = sc.nextLine();
+                    gestor.cadastrarEquipe(nome, desc);
+                }
+                case 8 -> {
+                    System.out.print("Nome da equipe a atualizar: ");
+                    String nome = sc.nextLine();
+                    System.out.print("Novo nome (ou deixe em branco): ");
+                    String novoNome = sc.nextLine();
+                    System.out.print("Nova descrição (ou deixe em branco): ");
+                    String novaDesc = sc.nextLine();
+                    gestor.atualizarEquipe(nome, novoNome, novaDesc);
+                }
+                case 9 -> {
+                    System.out.print("Nome da equipe a remover: ");
+                    String nome = sc.nextLine();
+                    gestor.removerEquipe(nome);
                 }
                 case 10 -> {
+                    System.out.print("CPF do usuário: ");
+                    String cpf = sc.nextLine();
                     System.out.print("Nome da equipe: ");
-                    String nomeEquipe = scanner.nextLine();
-                    System.out.print("Novo nome: ");
-                    String novoNome = scanner.nextLine();
-                    System.out.print("Nova descrição: ");
-                    String novaDesc = scanner.nextLine();
-                    gestor.atualizarEquipe(nomeEquipe, novoNome, novaDesc);
+                    String equipe = sc.nextLine();
+                    gestor.adicionarUsuarioEmEquipe(cpf, equipe);
                 }
                 case 11 -> {
                     System.out.print("Nome da equipe: ");
-                    String nomeEquipe = scanner.nextLine();
-                    gestor.removerEquipe(nomeEquipe);
+                    String equipe = sc.nextLine();
+                    System.out.print("Nome do projeto: ");
+                    String projeto = sc.nextLine();
+                    gestor.associarEquipeAProjeto(equipe, projeto);
                 }
-                case 12 -> gestor.getEquipes().forEach(System.out::println);
-				
-				case 13 -> {
-					System.out.print("CPF do usuário: ");
-					String cpfUsuario = scanner.nextLine();
-					System.out.print("Nome da equipe: ");
-					String nomeEquipe = scanner.nextLine();
-					gestor.adicionarUsuarioEmEquipe(cpfUsuario, nomeEquipe);
-				}
-
-				case 14 -> {
-					System.out.print("Nome da equipe: ");
-					String nomeEquipe = scanner.nextLine();
-					System.out.print("Nome do projeto: ");
-					String nomeProjeto = scanner.nextLine();
-					gestor.associarEquipeAProjeto(nomeEquipe, nomeProjeto);
-				}				
-				                
-                case 15 -> gestor.salvarCSV();
-				
-                case 16 -> gestor.carregarCSV();
-				
-				case 17 -> gestor.restaurarBackupEscolhido();
-				
-                case 0 -> System.out.println("Encerrando sistema...");
-				
+                case 12 -> {
+                    System.out.println("Digite o caminho do backup de usuários:");
+                    String arqUsuarios = sc.nextLine();
+                    System.out.println("Digite o caminho do backup de projetos:");
+                    String arqProjetos = sc.nextLine();
+                    System.out.println("Digite o caminho do backup de equipes:");
+                    String arqEquipes = sc.nextLine();
+                    gestor.restaurarBackup(arqUsuarios, arqProjetos, arqEquipes);
+                }
+                case 0 -> System.out.println("Saindo...");
                 default -> System.out.println("Opção inválida!");
             }
+
         } while (opcao != 0);
 
-        scanner.close();
+        sc.close();
     }
 }

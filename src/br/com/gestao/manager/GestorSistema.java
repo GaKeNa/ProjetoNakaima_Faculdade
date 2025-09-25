@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Arrays;
 import java.io.File;
 
@@ -29,7 +28,7 @@ public class GestorSistema {
     private static final String PROJETOS_ARQ = "projetos.json";
     private static final String EQUIPES_ARQ = "equipes.json";
 
-	private static final String USUARIOS_CSV = "usuarios.csv";
+    private static final String USUARIOS_CSV = "usuarios.csv";
     private static final String PROJETOS_CSV = "projetos.csv";
     private static final String EQUIPES_CSV = "equipes.csv";
 
@@ -46,10 +45,10 @@ public class GestorSistema {
     public void salvarTudo() {
         if (tipoPersistencia == TipoPersistencia.JSON) {
             salvarJSON();
-			salvarBackupJSON();
+            salvarBackupJSON();
         } else {
             salvarCSV();
-			salvarBackupCSV();
+            salvarBackupCSV();
         }
     }
 
@@ -62,126 +61,96 @@ public class GestorSistema {
         }
     }
 
-	public List<String> listarBackups(String tipoArquivo) {
-		File pasta = new File("."); // pasta atual
-		String[] arquivos = pasta.list((dir, name) -> name.startsWith("backup_") && name.endsWith(tipoArquivo));
-		if (arquivos != null) {
-			Arrays.sort(arquivos); // opcional: ordenar por nome (timestamp)
-			return Arrays.asList(arquivos);
-		}
-		return new ArrayList<>();
-	}
+    public List<String> listarBackups(String palavraChave) {
+        File pasta = new File("."); // pasta atual
+        String[] arquivos = pasta.list((dir, name) ->
+                name.startsWith("backup_") && name.contains(palavraChave)
+        );
+        if (arquivos != null) {
+            Arrays.sort(arquivos);
+            return Arrays.asList(arquivos);
+        }
+        return new ArrayList<>();
+    }
 
-	// ==== Backup JSON ====
-	private void salvarBackupJSON() {
-		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-		Persistencia.salvar("backup_usuarios_" + timestamp + ".json", usuarios);
-		Persistencia.salvar("backup_projetos_" + timestamp + ".json", projetos);
-		Persistencia.salvar("backup_equipes_" + timestamp + ".json", equipes);
-		System.out.println("Backup JSON criado: " + timestamp);
-	}
+    // ==== Backup JSON ====
+    private void salvarBackupJSON() {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        Persistencia.salvar("backup_usuarios_" + timestamp + ".json", usuarios);
+        Persistencia.salvar("backup_projetos_" + timestamp + ".json", projetos);
+        Persistencia.salvar("backup_equipes_" + timestamp + ".json", equipes);
+        System.out.println("Backup JSON criado: " + timestamp);
+    }
 
-	// ==== Backup CSV ====
-	private void salvarBackupCSV() {
-		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-		PersistenciaCSV.salvar("backup_usuarios_" + timestamp + ".csv", gerarDadosUsuariosCSV());
-		PersistenciaCSV.salvar("backup_projetos_" + timestamp + ".csv", gerarDadosProjetosCSV());
-		PersistenciaCSV.salvar("backup_equipes_" + timestamp + ".csv", gerarDadosEquipesCSV());
-		System.out.println("Backup CSV criado: " + timestamp);
-	}
+    // ==== Backup CSV ====
+    private void salvarBackupCSV() {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        PersistenciaCSV.salvar("backup_usuarios_" + timestamp + ".csv", gerarDadosUsuariosCSV());
+        PersistenciaCSV.salvar("backup_projetos_" + timestamp + ".csv", gerarDadosProjetosCSV());
+        PersistenciaCSV.salvar("backup_equipes_" + timestamp + ".csv", gerarDadosEquipesCSV());
+        System.out.println("Backup CSV criado: " + timestamp);
+    }
 
-	// ==== Restaurar BackUp ====
-	
-	public void restaurarBackup(String caminhoUsuarios, String caminhoProjetos, String caminhoEquipes) {
-	    if (tipoPersistencia == TipoPersistencia.JSON) {
-	        Type usuariosType = new TypeToken<ArrayList<Usuario>>() {}.getType();
-	        Type projetosType = new TypeToken<ArrayList<Projeto>>() {}.getType();
-	        Type equipesType = new TypeToken<ArrayList<Equipe>>() {}.getType();
+    // ==== Restaurar Backup ====
+    public void restaurarBackup(String caminhoUsuarios, String caminhoProjetos, String caminhoEquipes) {
+        if (tipoPersistencia == TipoPersistencia.JSON) {
+            Type usuariosType = new TypeToken<ArrayList<Usuario>>() {}.getType();
+            Type projetosType = new TypeToken<ArrayList<Projeto>>() {}.getType();
+            Type equipesType = new TypeToken<ArrayList<Equipe>>() {}.getType();
 
-	        List<Usuario> u = Persistencia.carregar(caminhoUsuarios, usuariosType);
-	        List<Projeto> p = Persistencia.carregar(caminhoProjetos, projetosType);
-	        List<Equipe> e = Persistencia.carregar(caminhoEquipes, equipesType);
+            List<Usuario> u = Persistencia.carregar(caminhoUsuarios, usuariosType);
+            List<Projeto> p = Persistencia.carregar(caminhoProjetos, projetosType);
+            List<Equipe> e = Persistencia.carregar(caminhoEquipes, equipesType);
 
-	        if (u != null) usuarios = u;
-	        if (p != null) projetos = p;
-	        if (e != null) equipes = e;
+            if (u != null) usuarios = u;
+            if (p != null) projetos = p;
+            if (e != null) equipes = e;
 
-	    } else {
-	        List<String[]> usuariosCSV = PersistenciaCSV.carregar(caminhoUsuarios);
-	        usuarios.clear();
-	        for (String[] u : usuariosCSV) {
-	            usuarios.add(new Usuario(u[0], u[1], u[2], u[3], u[4], u[5], PerfilUsuario.valueOf(u[6])));
-	        }
+        } else {
+            List<String[]> usuariosCSV = PersistenciaCSV.carregar(caminhoUsuarios);
+            usuarios.clear();
+            for (String[] u : usuariosCSV) {
+                usuarios.add(new Usuario(u[0], u[1], u[2], u[3], u[4], u[5], PerfilUsuario.valueOf(u[6])));
+            }
 
-	        List<String[]> equipesCSV = PersistenciaCSV.carregar(caminhoEquipes);
-	        equipes.clear();
-	        for (String[] e : equipesCSV) {
-	            Equipe equipe = new Equipe(e[0], e[1]);
-	            if (e.length > 2 && !e[2].isEmpty()) {
-	                String[] cpfs = e[2].split(",");
-	                for (String cpf : cpfs) {
-	                    usuarios.stream()
-	                            .filter(u -> u.getCpf().equals(cpf))
-	                            .findFirst()
-	                            .ifPresent(equipe::adicionarMembro);
-	                }
-	            }
-	            equipes.add(equipe);
-	        }
+            List<String[]> equipesCSV = PersistenciaCSV.carregar(caminhoEquipes);
+            equipes.clear();
+            for (String[] e : equipesCSV) {
+                Equipe equipe = new Equipe(e[0], e[1]);
+                if (e.length > 2 && !e[2].isEmpty()) {
+                    String[] cpfs = e[2].split(",");
+                    for (String cpf : cpfs) {
+                        usuarios.stream()
+                                .filter(u -> u.getCpf().equals(cpf))
+                                .findFirst()
+                                .ifPresent(equipe::adicionarMembro);
+                    }
+                }
+                equipes.add(equipe);
+            }
 
-	        List<String[]> projetosCSV = PersistenciaCSV.carregar(caminhoProjetos);
-	        projetos.clear();
-	        for (String[] p : projetosCSV) {
-	            Usuario gerente = usuarios.stream()
-	                    .filter(u -> u.getCpf().equals(p[2]))
-	                    .findFirst().orElse(null);
-	            Equipe equipe = equipes.stream()
-	                    .filter(eq -> eq.getNome().equalsIgnoreCase(p[3]))
-	                    .findFirst().orElse(null);
+            List<String[]> projetosCSV = PersistenciaCSV.carregar(caminhoProjetos);
+            projetos.clear();
+            for (String[] p : projetosCSV) {
+                Usuario gerente = usuarios.stream()
+                        .filter(u -> u.getCpf().equals(p[2]))
+                        .findFirst().orElse(null);
+                Equipe equipe = equipes.stream()
+                        .filter(eq -> eq.getNome().equalsIgnoreCase(p[3]))
+                        .findFirst().orElse(null);
 
-	            Projeto projeto = new Projeto(
-	                    p[0], "Carregado do backup",
-	                    LocalDate.now(), LocalDate.now().plusDays(30),
-	                    StatusProjeto.valueOf(p[1]), gerente
-	            );
-	            projeto.setEquipe(equipe);
-	            projetos.add(projeto);
-	        }
-	    }
+                Projeto projeto = new Projeto(
+                        p[0], p[1],
+                        LocalDate.parse(p[4]), LocalDate.parse(p[5]),
+                        StatusProjeto.valueOf(p[6]), gerente
+                );
+                projeto.setEquipe(equipe);
+                projetos.add(projeto);
+            }
+        }
 
-	    System.out.println("Backup restaurado com sucesso!");
-	}
-	
-	public void restaurarBackupEscolhido() {
-		String extensao = tipoPersistencia == TipoPersistencia.JSON ? ".json" : ".csv";
-
-		List<String> backupsUsuarios = listarBackups("usuarios" + extensao);
-		List<String> backupsProjetos = listarBackups("projetos" + extensao);
-		List<String> backupsEquipes = listarBackups("equipes" + extensao);
-
-		if (backupsUsuarios.isEmpty() || backupsProjetos.isEmpty() || backupsEquipes.isEmpty()) {
-			System.out.println("Nenhum backup encontrado!");
-			return;
-		}
-
-		System.out.println("\nBackups disponíveis de usuários:");
-		for (int i = 0; i < backupsUsuarios.size(); i++) {
-			System.out.println((i + 1) + " - " + backupsUsuarios.get(i));
-		}
-
-		Scanner sc = new Scanner(System.in);
-		System.out.print("Escolha o backup a restaurar (usuários/projetos/equipes com mesmo índice): ");
-		int escolha = sc.nextInt() - 1;
-
-		if (escolha >= 0 && escolha < backupsUsuarios.size()) {
-			restaurarBackup(backupsUsuarios.get(escolha),
-							backupsProjetos.get(escolha),
-							backupsEquipes.get(escolha));
-		} else {
-			System.out.println("Índice inválido!");
-		}
-	}
-
+        System.out.println("Backup restaurado com sucesso!");
+    }
 
     // ==== Persistência JSON ====
     private void salvarJSON() {
@@ -209,51 +178,20 @@ public class GestorSistema {
 
     // ==== Persistência CSV ====
     public void salvarCSV() {
-        // Usuários
-        List<String[]> dadosUsuarios = new ArrayList<>();
-        for (Usuario u : usuarios) {
-            dadosUsuarios.add(new String[]{
-                    u.getNomeCompleto(),
-                    u.getCpf(),
-                    u.getEmail(),
-                    u.getPerfil().name()
-            });
-        }
-        PersistenciaCSV.salvar(USUARIOS_CSV, dadosUsuarios);
-
-        // Projetos
-        List<String[]> dadosProjetos = new ArrayList<>();
-        for (Projeto p : projetos) {
-            dadosProjetos.add(new String[]{
-                    p.getNome(),
-                    p.getStatus().name(),
-                    p.getGerenteResponsavel() != null ? p.getGerenteResponsavel().getCpf() : "",
-                    p.getEquipe() != null ? p.getEquipe().getNome() : ""
-            });
-        }
-        PersistenciaCSV.salvar(PROJETOS_CSV, dadosProjetos);
-
-        // Equipes
-        List<String[]> dadosEquipes = new ArrayList<>();
-        for (Equipe e : equipes) {
-            String membros = String.join(",", e.getMembros().stream().map(Usuario::getCpf).toList());
-            dadosEquipes.add(new String[]{e.getNome(), e.toString(), membros});
-        }
-        PersistenciaCSV.salvar(EQUIPES_CSV, dadosEquipes);
-
+        PersistenciaCSV.salvar(USUARIOS_CSV, gerarDadosUsuariosCSV());
+        PersistenciaCSV.salvar(PROJETOS_CSV, gerarDadosProjetosCSV());
+        PersistenciaCSV.salvar(EQUIPES_CSV, gerarDadosEquipesCSV());
         System.out.println("Dados salvos em CSV!");
     }
 
     public void carregarCSV() {
-        // Usuários
-        List<String[]> usuariosCSV = PersistenciaCSV.carregar(USUARIOS_CSV);
-        for (String[] u : usuariosCSV) {
+        usuarios.clear();
+        for (String[] u : PersistenciaCSV.carregar(USUARIOS_CSV)) {
             usuarios.add(new Usuario(u[0], u[1], u[2], u[3], u[4], u[5], PerfilUsuario.valueOf(u[6])));
         }
 
-        // Equipes
-        List<String[]> equipesCSV = PersistenciaCSV.carregar(EQUIPES_CSV);
-        for (String[] e : equipesCSV) {
+        equipes.clear();
+        for (String[] e : PersistenciaCSV.carregar(EQUIPES_CSV)) {
             Equipe equipe = new Equipe(e[0], e[1]);
             if (e.length > 2 && !e[2].isEmpty()) {
                 String[] cpfs = e[2].split(",");
@@ -267,9 +205,8 @@ public class GestorSistema {
             equipes.add(equipe);
         }
 
-        // Projetos
-        List<String[]> projetosCSV = PersistenciaCSV.carregar(PROJETOS_CSV);
-        for (String[] p : projetosCSV) {
+        projetos.clear();
+        for (String[] p : PersistenciaCSV.carregar(PROJETOS_CSV)) {
             Usuario gerente = usuarios.stream()
                     .filter(u -> u.getCpf().equals(p[2]))
                     .findFirst().orElse(null);
@@ -278,9 +215,9 @@ public class GestorSistema {
                     .findFirst().orElse(null);
 
             Projeto projeto = new Projeto(
-                    p[0], "Carregado do CSV",
-                    LocalDate.now(), LocalDate.now().plusDays(30),
-                    StatusProjeto.valueOf(p[1]), gerente
+                    p[0], p[1],
+                    LocalDate.parse(p[4]), LocalDate.parse(p[5]),
+                    StatusProjeto.valueOf(p[6]), gerente
             );
             projeto.setEquipe(equipe);
             projetos.add(projeto);
@@ -289,189 +226,176 @@ public class GestorSistema {
         System.out.println("Dados carregados de CSV!");
     }
 
-	// ==== USUÁRIOS ====
-	public void cadastrarUsuario(String nome, String cpf, String email, String cargo,
-            String login, String senha, PerfilUsuario perfil) {
-		Usuario usuario = new Usuario(nome, cpf, email, cargo, login, senha, perfil);
-		usuarios.add(usuario);
-		salvarTudo(); // salva automático
-		System.out.println("Usuário cadastrado com sucesso!");
-	}
+    // ==== USUÁRIOS ====
+    public void cadastrarUsuario(String nome, String cpf, String email, String cargo,
+                                 String login, String senha, PerfilUsuario perfil) {
+        Usuario usuario = new Usuario(nome, cpf, email, cargo, login, senha, perfil);
+        usuarios.add(usuario);
+        salvarTudo();
+        System.out.println("Usuário cadastrado com sucesso!");
+    }
 
-	public void atualizarUsuario(String cpf, String novoNome, String novoEmail) {
-		for (Usuario u : usuarios) {
-			if (u.getCpf().equals(cpf)) {
-				u.setNomeCompleto(novoNome);
-				u.setEmail(novoEmail);
-				salvarTudo(); // salva automático
-				System.out.println("Usuário atualizado!");
-				return;
-			}
-		}
-		System.out.println("Usuário não encontrado!");
-	}
+    public void atualizarUsuario(String cpf, String novoEmail, String novoCargo) {
+        for (Usuario u : usuarios) {
+            if (u.getCpf().equals(cpf)) {
+                u.setEmail(novoEmail);
+                u.setCargo(novoCargo);
+                salvarTudo();
+                System.out.println("Usuário atualizado!");
+                return;
+            }
+        }
+        System.out.println("Usuário não encontrado!");
+    }
 
-	public void removerUsuario(String cpf) {
-		boolean removido = usuarios.removeIf(u -> u.getCpf().equals(cpf));
-		if (removido) {
-			salvarTudo(); // salva automático
-			System.out.println("Usuário removido!");
-		} else {
-			System.out.println("Usuário não encontrado!");
-		}
-	}
-
-	public void listarUsuarios() {
-		if (usuarios.isEmpty()) {
-			System.out.println("Nenhum usuário cadastrado.");
-		} else {
-			usuarios.forEach(System.out::println);
-		}
-	}
-
+    public void removerUsuario(String cpf) {
+        boolean removido = usuarios.removeIf(u -> u.getCpf().equals(cpf));
+        if (removido) {
+            salvarTudo();
+            System.out.println("Usuário removido!");
+        } else {
+            System.out.println("Usuário não encontrado!");
+        }
+    }
 
     // ==== PROJETOS ====
-	public void cadastrarProjeto(String nome, String descricao, LocalDate inicio,
-            LocalDate fim, StatusProjeto status, Usuario gerente) {
-		Projeto projeto = new Projeto(nome, descricao, inicio, fim, status, gerente);		
-		projetos.add(projeto);
-		salvarTudo();
-		System.out.println("Projeto cadastrado!");
-	}
+    public void cadastrarProjeto(String nome, String descricao, LocalDate inicio,
+                                 LocalDate fim, StatusProjeto status, Usuario gerente) {
+        Projeto projeto = new Projeto(nome, descricao, inicio, fim, status, gerente);
+        projetos.add(projeto);
+        salvarTudo();
+        System.out.println("Projeto cadastrado!");
+    }
 
-	public void atualizarProjeto(String nome, StatusProjeto novoStatus) {
+    public void atualizarProjeto(String nome, StatusProjeto novoStatus) {
         projetos.stream()
                 .filter(p -> p.getNome().equalsIgnoreCase(nome))
                 .findFirst()
                 .ifPresentOrElse(p -> {
                     p.setStatus(novoStatus);
+                    salvarTudo();
                     System.out.println("Projeto atualizado: " + p);
                 }, () -> System.out.println("Projeto não encontrado."));
     }
-	
-	public void atualizarNomeDoProjeto(String nomeProjeto, String novoNome) {
-		for (Projeto p : projetos) {
-			if (p.getNome().equalsIgnoreCase(nomeProjeto)) {
-				p.setNome(novoNome);
-				salvarTudo();
-				System.out.println("Projeto atualizado!");
-				return;
-			}
-		}
-		System.out.println("Projeto não encontrado!");
-	}
 
-	public void removerProjeto(String nomeProjeto) {
-		boolean removido = projetos.removeIf(p -> p.getNome().equalsIgnoreCase(nomeProjeto));
-		if (removido) {
-			salvarTudo();
-			System.out.println("Projeto removido!");
-		} else {
-			System.out.println("Projeto não encontrado!");
-		}
-	}
-
+    public void removerProjeto(String nomeProjeto) {
+        boolean removido = projetos.removeIf(p -> p.getNome().equalsIgnoreCase(nomeProjeto));
+        if (removido) {
+            salvarTudo();
+            System.out.println("Projeto removido!");
+        } else {
+            System.out.println("Projeto não encontrado!");
+        }
+    }
 
     // ==== EQUIPES ====
     public void cadastrarEquipe(String nome, String descricao) {
         Equipe equipe = new Equipe(nome, descricao);
         equipes.add(equipe);
-		salvarTudo();
-		System.out.println("Equipe cadastrada!");
-	}
+        salvarTudo();
+        System.out.println("Equipe cadastrada!");
+    }
 
-	public void atualizarEquipe(String nome, String novoNome, String novaDesc) {
+    public void atualizarEquipe(String nome, String novoNome, String novaDesc) {
         equipes.stream()
-        .filter(e -> e.getNome().equalsIgnoreCase(nome))
-        .findFirst()
-        .ifPresentOrElse(e -> {
-            if (novoNome != null && !novoNome.isBlank()) e.setNome(novoNome);
-            if (novaDesc != null && !novaDesc.isBlank()) e.setDescricao(novaDesc);
-            System.out.println("Equipe atualizada: " + e);
+                .filter(e -> e.getNome().equalsIgnoreCase(nome))
+                .findFirst()
+                .ifPresentOrElse(e -> {
+                    if (novoNome != null && !novoNome.isBlank()) e.setNome(novoNome);
+                    if (novaDesc != null && !novaDesc.isBlank()) e.setDescricao(novaDesc);
+                    salvarTudo();
+                    System.out.println("Equipe atualizada: " + e);
+                }, () -> System.out.println("Equipe não encontrada."));
+    }
+
+    public void removerEquipe(String nomeEquipe) {
+        boolean removido = equipes.removeIf(e -> e.getNome().equalsIgnoreCase(nomeEquipe));
+        if (removido) {
             salvarTudo();
-        }, () -> System.out.println("Equipe não encontrada."));
-	}
+            System.out.println("Equipe removida!");
+        } else {
+            System.out.println("Equipe não encontrada!");
+        }
+    }
 
-	public void removerEquipe(String nomeEquipe) {
-		boolean removido = equipes.removeIf(e -> e.getNome().equalsIgnoreCase(nomeEquipe));
-		if (removido) {
-			salvarTudo();
-			System.out.println("Equipe removida!");
-		} else {
-			System.out.println("Equipe não encontrada!");
-		}
-	}
+    // ==== ASSOCIAÇÕES ====
+    public void adicionarUsuarioEmEquipe(String cpf, String nomeEquipe) {
+        Usuario usuario = usuarios.stream()
+                .filter(u -> u.getCpf().equals(cpf))
+                .findFirst().orElse(null);
 
-	
-	// ==== ASSOCIAÇÕES ====
+        Equipe equipe = equipes.stream()
+                .filter(e -> e.getNome().equalsIgnoreCase(nomeEquipe))
+                .findFirst().orElse(null);
 
-	// Adicionar usuário em equipe
-	public void adicionarUsuarioEmEquipe(String cpf, String nomeEquipe) {
-		Usuario usuario = usuarios.stream()
-				.filter(u -> u.getCpf().equals(cpf))
-				.findFirst().orElse(null);
+        if (usuario != null && equipe != null) {
+            equipe.adicionarMembro(usuario);
+            salvarTudo();
+            System.out.println("Usuário adicionado à equipe!");
+        } else {
+            System.out.println("Usuário ou equipe não encontrados.");
+        }
+    }
 
-		Equipe equipe = equipes.stream()
-				.filter(e -> e.getNome().equalsIgnoreCase(nomeEquipe))
-				.findFirst().orElse(null);
+    public void associarEquipeAProjeto(String nomeEquipe, String nomeProjeto) {
+        Equipe equipe = equipes.stream()
+                .filter(e -> e.getNome().equalsIgnoreCase(nomeEquipe))
+                .findFirst().orElse(null);
 
-		if (usuario != null && equipe != null) {
-			equipe.adicionarMembro(usuario);
-			salvarTudo(); // salva automático
-			System.out.println("Usuário adicionado à equipe!");
-		} else {
-			System.out.println("Usuário ou equipe não encontrados.");
-		}
-	}
+        Projeto projeto = projetos.stream()
+                .filter(p -> p.getNome().equalsIgnoreCase(nomeProjeto))
+                .findFirst().orElse(null);
 
-	public void associarEquipeAProjeto(String nomeEquipe, String nomeProjeto) {
-		Equipe equipe = equipes.stream()
-				.filter(e -> e.getNome().equalsIgnoreCase(nomeEquipe))
-				.findFirst().orElse(null);
+        if (equipe != null && projeto != null) {
+            projeto.setEquipe(equipe);
+            salvarTudo();
+            System.out.println("Equipe atribuída ao projeto!");
+        } else {
+            System.out.println("Equipe ou projeto não encontrados.");
+        }
+    }
 
-		Projeto projeto = projetos.stream()
-				.filter(p -> p.getNome().equalsIgnoreCase(nomeProjeto))
-				.findFirst().orElse(null);
+    // ==== CSV helpers ====
+    private List<String[]> gerarDadosUsuariosCSV() {
+        List<String[]> dados = new ArrayList<>();
+        for (Usuario u : usuarios) {
+            dados.add(new String[]{
+                    u.getNomeCompleto(),
+                    u.getCpf(),
+                    u.getEmail(),
+                    u.getCargo(),
+                    u.getLogin(),
+                    u.getSenha(),
+                    u.getPerfil().name()
+            });
+        }
+        return dados;
+    }
 
-		if (equipe != null && projeto != null) {
-			projeto.setEquipe(equipe);
-			salvarTudo(); // salva automático
-			System.out.println("Equipe atribuída ao projeto!");
-		} else {
-			System.out.println("Equipe ou projeto não encontrados.");
-		}
-	}
+    private List<String[]> gerarDadosProjetosCSV() {
+        List<String[]> dados = new ArrayList<>();
+        for (Projeto p : projetos) {
+            dados.add(new String[]{
+                    p.getNome(),
+                    p.getDescricao(),
+                    p.getGerenteResponsavel() != null ? p.getGerenteResponsavel().getCpf() : "",
+                    p.getEquipe() != null ? p.getEquipe().getNome() : "",
+                    p.getDataInicio().toString(),
+                    p.getDataFimPrevista().toString(),
+                    p.getStatus().name()
+            });
+        }
+        return dados;
+    }
 
-	private List<String[]> gerarDadosUsuariosCSV() {
-		List<String[]> dados = new ArrayList<>();
-		for (Usuario u : usuarios) {
-			dados.add(new String[]{u.getNomeCompleto(), u.getCpf(), u.getEmail(), u.getPerfil().name()});
-		}
-		return dados;
-	}
-
-	private List<String[]> gerarDadosProjetosCSV() {
-		List<String[]> dados = new ArrayList<>();
-		for (Projeto p : projetos) {
-			dados.add(new String[]{
-					p.getNome(),
-					p.getStatus().name(),
-					p.getGerenteResponsavel() != null ? p.getGerenteResponsavel().getCpf() : "",
-					p.getEquipe() != null ? p.getEquipe().getNome() : ""
-			});
-		}
-		return dados;
-	}
-
-	private List<String[]> gerarDadosEquipesCSV() {
-		List<String[]> dados = new ArrayList<>();
-		for (Equipe e : equipes) {
-			String membros = String.join(",", e.getMembros().stream().map(Usuario::getCpf).toList());
-			dados.add(new String[]{e.getNome(), e.toString(), membros});
-		}
-		return dados;
-	}
-
+    private List<String[]> gerarDadosEquipesCSV() {
+        List<String[]> dados = new ArrayList<>();
+        for (Equipe e : equipes) {
+            String membros = String.join(",", e.getMembros().stream().map(Usuario::getCpf).toList());
+            dados.add(new String[]{e.getNome(), e.getDescricao(), membros});
+        }
+        return dados;
+    }
 
     // ==== GETTERS ====
     public List<Usuario> getUsuarios() { return usuarios; }

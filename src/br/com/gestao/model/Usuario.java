@@ -13,6 +13,7 @@ public class Usuario {
 	
 	public void setEmail(String email) { this.email = email; }
 	public void setCargo(String cargo) { this.cargo = cargo; }
+	public void setNomeCompleto(String nomeCompleto) { this.nomeCompleto = nomeCompleto; }
 
 
     public Usuario(String nomeCompleto, String cpf, String email, String cargo,

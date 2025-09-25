@@ -29,6 +29,7 @@ public class Projeto {
     public void setStatus(StatusProjeto status) { this.status = status; }
     public Equipe getEquipe() { return equipe; }
     public void setEquipe(Equipe equipe) { this.equipe = equipe; }
+	public void setNome(String nome) { this.nome = nome; }
 
     @Override
     public String toString() {

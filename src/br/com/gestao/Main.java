@@ -41,7 +41,7 @@ public class Main {
             System.out.println("3 - Remover usuário");
             System.out.println("4 - Listar usuários");
             System.out.println("5 - Cadastrar projeto");
-            System.out.println("6 - Atualizar projeto");
+            System.out.println("6 - Atualizar status do projeto");
             System.out.println("7 - Remover projeto");
             System.out.println("8 - Listar projetos");
             System.out.println("9 - Cadastrar equipe");

@@ -9,11 +9,13 @@ public class Usuario {
     private String cargo;
     private String login;
     private String senha;
+    private Equipe equipe;
     private PerfilUsuario perfil;
 	
 	public void setEmail(String email) { this.email = email; }
 	public void setCargo(String cargo) { this.cargo = cargo; }
 	public void setNomeCompleto(String nomeCompleto) { this.nomeCompleto = nomeCompleto; }
+    public void setEquipe(Equipe equipe) { this.equipe = equipe; }
 
 
     public Usuario(String nomeCompleto, String cpf, String email, String cargo,
@@ -33,6 +35,7 @@ public class Usuario {
     public String getCargo() { return cargo; }
     public String getLogin() { return login; }
     public String getSenha() { return senha; }
+    public String getEquipe() { return equipe.toString(); }
     public PerfilUsuario getPerfil() { return perfil; }
 
     @Override
